@@ -1,46 +1,57 @@
-import { useEffect, useState,useMemo} from "react";
+import { useState, useEffect, useMemo } from "react";
+
 export interface Beverage {
-    name: string;
-    producerName: string;
-    beverageName: string;
-    beverageColor: string;
-    beverageStyle: string;
-    producerLocation: string;
-    abv: number;
-    ibu: number;
-    logo: string;
-    level: number;
-  }
-function useFetchData(url:string){
-    data:Beverage[]| null;
-    done:boolean;
-}{
-    const[data,dataSet]= useState<Beverage [] | null>(null);
-    const[done, doneSet]= useState(false);
-
-    useEffect(()=>{
-        fetch(url)
-        .then((resp) => resp.json)
-        .then((d: Beverage[]) =>{
-            dataSet(d);
-            doneSet(true);
-        });
-    },[url]);
-
-    return{
-        data,
-        done,
-    };
+  name: string;
+  producerName: string;
+  beverageName: string;
+  beverageColor: string;
+  beverageStyle: string;
+  producerLocation: string;
+  abv: number;
+  ibu: number;
+  logo: string;
+  level: number;
 }
-function CustomHookComponent () {
-    const { data } = useFetchData<Beverage[]>("/hv-taplist.json");
+
+function useFetchData<Payload>(
+  url: string
+): {
+  data: Payload | null;
+  done: boolean;
+} {
+  const [data, dataSet] = useState<Payload | null>(null);
+  const [done, doneSet] = useState(false);
+
+  useEffect(() => {
+    fetch(url)
+      .then((resp) => resp.json())
+      .then((d: Payload) => {
+        dataSet(d);
+        doneSet(true);
+      });
+  }, [url]);
+
+  return {
+    data,
+    done,
+  };
+}
+
+function CustomHookComponent() {
+  const { data } = useFetchData<Beverage[]>("/hv-taplist.json");
   const portlandTaps = useMemo(
     () =>
       (data || []).filter((bev) => bev.producerLocation.includes("Portland")),
     [data]
   );
-    return <div></div>
-    
-    }
+
+  return (
+    <div>
+      {portlandTaps.length && (
+        <img src={portlandTaps![1].logo} alt="Beverage logo" />
+      )}
+    </div>
+  );
+}
 
 export default CustomHookComponent;
